@@ -1,6 +1,17 @@
 import { fetchRequest } from "../api";
 import { ENDPOINT, logout, SECTIONTYPE } from "../common";
 
+
+const audio=new Audio();
+const volume=document.querySelector("#volume")
+const playbutton=document.querySelector("#play");
+const totalSongDuration=document.querySelector("#total-song-duration");
+const SongDurationCompleted=document.querySelector("#song-duration-completed");
+
+const progress=document.querySelector("#progress")
+
+
+
 const onProfileClick = (event) => {
   event.stopPropagation();
   const profileMenu = document.querySelector("#profile-menu");
@@ -19,13 +30,14 @@ const onplayListItemClick = (event, id) => {
 
 const onContentScroll=(event)=>{ 
   
-    const header = document.querySelector(".header");
-    const { scrollTop } = event.target;
+  const { scrollTop } = event.target;
+  // console.log(scrollTop)
+  const header = document.querySelector(".header");
     if (scrollTop >= header.offsetHeight) {
       header.classList.add(
         "sticky",
         "top-0",
-        "bg-black-secondary",
+        "bg-black",
         "duration-300"
       );
       header.classList.remove("bg-transparent");
@@ -33,26 +45,31 @@ const onContentScroll=(event)=>{
       header.classList.remove(
         "sticky",
         "top-0",
-        "bg-black-secondary",
+        "bg-black",
         "duration-300"
       );
       header.classList.add("bg-transparent");
     }
-    if (history.state.type === SECTIONTYPE.PLAYLIST) {
-      const coverContent=document.querySelector("#cover-content");
-      const playlistHeader = document.querySelector("#playlist-header");
-      // if (scrollTop >= (coverContent.offsetHeight - header.offsetHeight)) {
-      //   console.log(header.offsetHeight)
-
-        playlistHeader.classList.add("sticky","bg-black-secondary","px-8");
-        playlist.classlist.remove("mx-8")
-
-      // }
-    }
+     if (history.state.type === SECTIONTYPE.PLAYLIST) {
+      const coverElement=document.getElementById("cover-content");
+    
+      const playlistHeader=document.querySelector("#playlist-header");
+      if(scrollTop>=(coverElement.offsetHeight-playlistHeader.offsetHeight)){
+        playlistHeader.classList.add("sticky","bg-black-base","px-8")
+        playlistHeader.classList.remove("mx-8")
+        playlistHeader.style.top=`${header.offsetHeight}px`
+      }
+      else{
+        playlistHeader.classList.remove("sticky","bg-black-base","px-8")
+        playlistHeader.classList.add("mx-8")
+        playlistHeader.style.top="revert"
+      }
+     
   }
+}
 
 
-
+ 
 
 const loadSection = (section) => {
   if (section.type === SECTIONTYPE.DASHBOARD) {
@@ -67,20 +84,60 @@ const loadSection = (section) => {
   document.querySelector(".content").addEventListener("scroll",onContentScroll)
 };
 
-const formatTime = (duration) => {
-  const min = Math.floor(duration / 60_000);
-  const sec = ((duration % 6_000) / 1000).toFixed(0);
-  const formattedTime =
-    sec == 60 ? min + 1 + ":00" : min + ":" + (sec < 10 ? "0" : "") + sec;
-  return formattedTime;
+const formatTime = (duration_ms) => {
+  let duration_sec = duration_ms/1000 ;
+  let min = Math.floor(duration_sec / 60);
+  let sec = Math.round(duration_sec % 60);
+  let duration = ((min < 10 ? "0":"" ) + min + ":" + (sec < 10 ? "0":"") + sec);
+  return duration
 };
+
+const onTrackSelection=(event,id)=>{
+ 
+        document.querySelectorAll("#tracks .track").forEach((trackItem)=>{
+          if(trackItem.id==id){
+            trackItem.classList.add("selected", "bg-gray")
+          }
+          else{
+            trackItem.classList.remove("selected", "bg-gray")
+          }
+        })
+
+        
+
+}
+
+const onAudioMetaDataLoaded=()=>{
+  totalSongDuration.textContent=`0:${audio.duration.toFixed(0)}`
+ 
+}
+
+
+const onplayTrack=(event,{id, artistNames,image, name,duration,previewUrl})=>{
+console.log(name)
+   const nowPlayingSongImage=document.querySelector("#now-playing-image")
+   nowPlayingSongImage.src=image.url;
+
+   const songTitle=document.querySelector("#now-playing-song");
+  songTitle.textContent=name;
+
+   const artists=document.querySelector("#now-playing-artists")
+artists.textContent=artistNames;
+
+audio.src=previewUrl;
+audio.addEventListener("loadedmetadata",onAudioMetaDataLoaded)
+audio.play();
+
+}
+
+
 
 
 const loadPlaylistTrack = ({ tracks }) => {
   const trackSection = document.querySelector("#tracks");
   let trackNo = 1;
   for (let trackItem of tracks.items) {
-    let { id, artists, name, album, duration_ms: duration } = trackItem.track;
+    let { id, artists, name, album, duration_ms: duration,preview_url:previewUrl} = trackItem.track;
     let track = document.createElement("section");
     track.className =
       " track p-1 grid grid-cols-[50px_1fr_1fr_50px] items-center gap-2 justify-items-start rounded-md hover:bg-light-black hover:cursor-pointer";
@@ -89,16 +146,30 @@ const loadPlaylistTrack = ({ tracks }) => {
     const artistNames=Array.from(artists,(artist) => {
       return artist.name}).join(", ");
     
-    track.innerHTML = `<p class="justify-self-center">${trackNo++}</p>
-   <section class="grid  gap-3 grid-cols-[auto_1fr]" >
+    track.innerHTML = `<p class=" relative flex justify-center items-center w-full justify-self-center"><span class="track-no">${trackNo++}</span></p>
+   <section class="grid  gap-2 grid-cols-[auto_1fr] place-items-center" >
   <img class="w-8 h-8" src="${image.url}" alt=""/>
-   <article class="flex flex-col items-center justify-center">
+   <article class="flex flex-col gap-0.5 justify-center">
    <h1 class="text-primary text-sm line-clamp-1">${name}</h1>
-    <h3 class="text-xs">${artistNames}</h3>
+    <h3 class="text-xs line-clamp-1">${artistNames}</h3>
      </article>
    </section>
-    <p class=line-clamp-1>${album.name}</p>
+    <p class="  text-sm line-clamp-1">${album.name}</p>
    <p>${formatTime(duration)}</p>`;
+
+    const playButton=document.createElement("button")
+    playButton.id=`play-track${id}`
+    playButton.className="play absolute w-full left-0 text-lg invisible"
+    playButton.innerHTML=`<span class="material-symbols-rounded">
+    play_arrow
+    </span>`;
+    playButton.addEventListener("click",(event)=>onplayTrack(event,{id, artistNames,image, name,duration,previewUrl}));
+   
+    
+    track.querySelector("p").appendChild(playButton);
+
+    track.addEventListener("click",(event)=>onTrackSelection(event,id));
+
     trackSection.appendChild(track);
   }
 };
@@ -107,9 +178,9 @@ const fillContentForPlaylist = async (playlistId) => {
   const playlist = await fetchRequest(`${ENDPOINT.playlist}/${playlistId}`);
   const pageContent = document.querySelector("#page-content");
   pageContent.innerHTML = `
-  <header id="playlist-header" class="mx-8 py-2 border-secondary border-b-[0.5px] ">
-  <nav class=py-2> 
-      <ul class="grid grid-cols-[50px_1fr_1fr_50px] gap-4">
+   <header id="playlist-header" class="mx-8 py-2 border-secondary border-b-[0.5px]  z-[10]">
+  <nav > 
+      <ul class="grid grid-cols-[50px_1fr_1fr_50px] gap-4 ">
           <li class="justify-self-center">#</li>
           <li>Title</li>
           <li>Album</li>
@@ -118,7 +189,7 @@ const fillContentForPlaylist = async (playlistId) => {
   </nav>
 </header>
 
-<section id="tracks" class="px-8 text-secondary  ">
+<section id="tracks" class="px-8 text-secondary mt-4  ">
 </section>
   `;
   loadPlaylistTrack(playlist);

@@ -7,15 +7,22 @@
     "sidenav content"
     "now-playing now-playing"
 }
-.main.content{
+.main .content{
     grid-area:content;
 
 }
-.main.sidenav{
+.main .sidenav{
     grid-area: sidenav;
 
 }
-.main.now-playing{
+.main .now-playing{
     grid-area: now-playing;
 
+}
+
+.track:hover .track-no,.track.selected .track-no {
+    visibility: hidden;
+}
+.track:hover .play,.track.selected .play{
+    visibility: visible;
 }
