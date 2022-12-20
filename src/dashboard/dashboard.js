@@ -160,6 +160,7 @@ console.log(name)
    audio.src=previewUrl;
 
 
+
 playButton.addEventListener("click",()=> onNowPlayingButton(id))
 clearInterval(progressInterval);
 
@@ -168,6 +169,8 @@ audio.removeEventListener("loadedmetadata",()=>onAudioMetaDataLoaded(id))
 audio.addEventListener("loadedmetadata",()=>onAudioMetaDataLoaded(id))
 
 audio.play();
+const songInfo=document.querySelector("#song-info");
+songInfo.classList.remove("invisible")
 
 progressInterval=setInterval(()=>{
   if(audio.paused){
@@ -179,6 +182,7 @@ progressInterval=setInterval(()=>{
   
 
 },100);
+
 }
 
 
@@ -187,7 +191,7 @@ progressInterval=setInterval(()=>{
 const loadPlaylistTrack = ({ tracks }) => {
   const trackSection = document.querySelector("#tracks");
   let trackNo = 1;
-  for (let trackItem of tracks.items) {
+  for (let trackItem of tracks.items.filter(item=>item.track.preview_url)) {
     let { id, artists, name, album, duration_ms: duration,preview_url:previewUrl} = trackItem.track;
     let track = document.createElement("section");
     track.className =
@@ -239,8 +243,8 @@ const fillContentForPlaylist = async (playlistId) => {
       <img class="object-contain h-40 w-40"  src="${images[0].url}" alt="">
      <section class="flex flex-col">
      <h1 class="text-lg capitalize ml-2">${type}</h1>
-      <h1 class="text-7xl">${name}</h1>
-      <p class="ml-2">${artistNames}</p>
+      <h1 class="text-6xl">${name}</h1>
+      <p class="ml-2 mt-4">${artistNames}</p>
       <p class="ml-2">${tracks.items.length} songs</p>
      </section> 
   
@@ -269,6 +273,7 @@ const fillContentForPlaylist = async (playlistId) => {
   `;
   loadPlaylistTrack(playlist);
 };
+
 
 const loadUserProfile = async () => {
   const defaultImage = document.querySelector("#default-image");
@@ -339,31 +344,51 @@ const fillContentForDashboard = () => {
   pageContent.innerHTML = innerHTML;
 };
 
+const onUserPlaylistsClicked=(id)=>{
+  const section={type:SECTIONTYPE.PLAYLIST,playlist:id}
+ history.pushState(section,"",`/dashboard/playlist/${id}`)
+ loadSection(section);
+}
 
 
-window.addEventListener("popstate", (event) => {
-  loadSection(event.state);
-  console.log(event.state);
-});
 
-volume.addEventListener("change",()=>{
-  audio.volume=volume.value/100;
+const loadUserPlaylists=async()=>{
+  const playlists=await fetchRequest(ENDPOINT.userPlaylist);
+  console.log(playlists);
+  const userPlaylistSection=document.querySelector("#user-playlists>ul");
+userPlaylistSection.innerHTML='';
+  for(let {name,id} of playlists.items){
+    const li=document.createElement("li");
+    li.textContent=name;
+    li.className="cursor-pointer hover:text-primary"
+    li.addEventListener("click",()=>onUserPlaylistsClicked(id));
+    userPlaylistSection.appendChild(li);
+  }
+}
 
-})
+
 document.addEventListener("DOMContentLoaded", () => {
   loadUserProfile();
   const section = { type: SECTIONTYPE.DASHBOARD };
   history.pushState(section, "", "");
-// const  section = { type: SECTIONTYPE.PLAYLIST,playlist:'37i9dQZF1DWX3SoTqhs2rq'};
-// history.pushState(section, "", `/dashboard/playlist/${section.playlist}`);
-
-
-  
   loadSection(section);
+  loadUserPlaylists();
   document.addEventListener("click", () => {
     const profileMenu = document.querySelector("#profile-menu");
     if (!profileMenu.classList.contains("hidden")) {
       profileMenu.classList.add("hidden");
     }
+  }); 
+  window.addEventListener("popstate", (event) => {
+    loadSection(event.state);
+    console.log(event.state);
   });
+  
+  volume.addEventListener("change",()=>{
+    audio.volume=volume.value/100;
+  
+  })
+
+
+
 });
