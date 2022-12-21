@@ -7,7 +7,7 @@ const volume=document.querySelector("#volume")
 const playButton=document.querySelector("#play");
 const totalSongDuration=document.querySelector("#total-song-duration");
 const SongDurationCompleted=document.querySelector("#song-duration-completed");
-
+let displayName;
 const progress=document.querySelector("#progress")
 let progressInterval;
 
@@ -147,7 +147,7 @@ const onNowPlayingButton=(id)=>{
 
 
 const onplayTrack=(event,{id, artistNames,image, name,duration,previewUrl})=>{
-console.log(name)
+
    const nowPlayingSongImage=document.querySelector("#now-playing-image")
    nowPlayingSongImage.src=image.url;
 
@@ -328,6 +328,14 @@ const loadPlayLists = () => {
 };
 
 const fillContentForDashboard = () => {
+  const coverElement=document.querySelector("#cover-content");
+  coverElement.innerHTML=`<h1 class="text-6xl">Hello</h1>`
+
+
+
+
+
+
   const pageContent = document.querySelector("#page-content");
   const playListMap = new Map([
     ["featured", "featured-playlist-items"],
