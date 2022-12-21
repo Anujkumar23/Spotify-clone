@@ -120,8 +120,8 @@
       <footer id="now-playing"
         class="now-playing border-t-2 border-t-light-black bg-black-secondary text-secondary"
       >
-        <section class="footer grid grid-cols-[1fr_2fr_1fr] gap-2 p-2">
-          <section id="song-info"  class="invisible grid grid-cols-[auto_1fr] place-content-center gap-4">
+
+        
             <img id="now-playing-image" class="h-15 w-15" src="" alt="" />
             <section class="flex flex-col justify-center">
               <h1 id="now-playing-song" class="text-sm font-semibold text-primary line-clamp-1" >name</h1>
@@ -130,22 +130,22 @@
           </section>
           <section id="audio-control" class="pt-2"  >
             <section class="flex  items-center justify-center gap hover:text-primary">
-              <button id="prev"><span style="font-size:48px"  class="material-symbols-rounded">
+              <button id="prev"><span style="font-size:36px"  class="material-symbols-rounded">
                 skip_previous
                 </span></button>
-              <button id="play"><span style="font-size:48px"  class="material-symbols-rounded">
+              <button id="play"><span style="font-size:40px"  class="material-symbols-rounded">
                 play_circle
                 </span></button>
-              <button id="next"><span style="font-size:48px" class="material-symbols-rounded">
+              <button id="next"><span style="font-size:36px" class="material-symbols-rounded">
                 skip_next
                 </span></button>
             </section>
-            <section class="flex  items-center justify-center gap-2 ">
-              <span id="song-duration-completed">0:00</span>
+            <section class="flex  items-center justify-center gap-2 pb-2  ">
+              <span id="song-duration-completed" class="text-sm">0:00</span>
             <section id="timeline" class=" h-2 w-full rounded-xl bg-primary cursor-pointer">
             <section id="progress" class="h-2 w-0 rounded-xl bg-green cursor-pointer"></section>
             </section>
-              <span id="total-song-duration">0:00</span>
+              <span id="total-song-duration" class='text-sm'>0:00</span>
             </section>
           </section>
           <section id="volume-control" class="flex items-center justify-center gap-2">
