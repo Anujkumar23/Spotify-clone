@@ -307,25 +307,29 @@ const fillContentForPlaylist = async (playlistId) => {
 };
 
 
-const loadUserProfile = async () => {
-  const defaultImage = document.querySelector("#default-image");
-  const displayNameElement = document.querySelector("#display-name");
-  const profileButton = document.querySelector("#user-profile-button");
-
-  const { display_name: displayName, images } = await fetchRequest(
-    ENDPOINT.userInfo
-  );
-
-  displayNameElement.textContent = displayName;
-
-  if (images?.length) {
-    defaultImage.classList.add("hidden");
-  } else {
-    defaultImage.classList.remove("hidden");
-  }
-
-  profileButton.addEventListener("click", onProfileClick);
+const loadUserProfile =  () => {
+   return new Promise(async(resolve,reject)=>{
+    const defaultImage = document.querySelector("#default-image");
+    const displayNameElement = document.querySelector("#display-name");
+    const profileButton = document.querySelector("#user-profile-button");
+  
+    const { display_name: displayName, images } = await fetchRequest(
+      ENDPOINT.userInfo
+    );
+  
+    displayNameElement.textContent = displayName;
+  
+    if (images?.length) {
+      defaultImage.classList.add("hidden");
+    } else {
+      defaultImage.classList.remove("hidden");
+    }
+  
+    profileButton.addEventListener("click", onProfileClick);
+    resolve({displayName})
+  })
 };
+  
 
 const loadPlaylist = async (endpoint, elementId) => {
   const {
@@ -361,7 +365,7 @@ const loadPlayLists = () => {
 
 const fillContentForDashboard = () => {
   const coverElement=document.querySelector("#cover-content");
-  coverElement.innerHTML=`<h1 class="text-6xl">Hello</h1>`
+  coverElement.innerHTML=`<h1 class="text-6xl">Hello,${displayName}</h1>`
   const pageContent = document.querySelector("#page-content");
   const playListMap = new Map([
     ["featured", "featured-playlist-items"],
@@ -401,7 +405,7 @@ userPlaylistSection.innerHTML='';
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async() => {
   const volume=document.querySelector("#volume")
   const playButton=document.querySelector("#play");
   const SongDurationCompleted=document.querySelector("#song-duration-completed");
@@ -414,11 +418,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  loadUserProfile();
+  ({displayName}=await loadUserProfile());
+  loadUserPlaylists();
   const section = { type: SECTIONTYPE.DASHBOARD };
   history.pushState(section, "", "");
   loadSection(section);
-  loadUserPlaylists();
+
   document.addEventListener("click", () => {
     const profileMenu = document.querySelector("#profile-menu");
     if (!profileMenu.classList.contains("hidden")) {
