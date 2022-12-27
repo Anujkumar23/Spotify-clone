@@ -358,9 +358,13 @@ const loadPlaylist = async (endpoint, elementId) => {
   }
 };
 
+
+
+
 const loadPlayLists = () => {
   loadPlaylist(ENDPOINT.featurePlaylist, "featured-playlist-items");
   loadPlaylist(ENDPOINT.toplists, "top-playlist-items");
+
 };
 
 const fillContentForDashboard = () => {
@@ -370,6 +374,7 @@ const fillContentForDashboard = () => {
   const playListMap = new Map([
     ["featured", "featured-playlist-items"],
     ["top playlists", "top-playlist-items"],
+   
   ]);
   let innerHTML = "";
   for (let [type, id] of playListMap) {

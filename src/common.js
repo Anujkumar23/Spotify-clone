@@ -9,6 +9,7 @@ export const ENDPOINT={
     userInfo:"me",
     featurePlaylist:"browse/featured-playlists?limit=5",
     toplists:"browse/categories/toplists/playlists?limit=10",
+    newRelease:"browse/new-releases?limit=5",
     playlist:"playlists",
     userPlaylist:"me/playlists"
     
